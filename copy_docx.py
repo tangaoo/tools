@@ -6,57 +6,94 @@
 
 """
 
+from Tkinter import *
+import tkFileDialog
 import docx
 import os
 
-#获取所有文件路径
-def walk_dir(path):
-	file_path = []
-	for root, dirs, files in os.walk(path):
-		for f in files:
-			if f.lower().endswith('docx'):
-				file_path.append(os.path.join(root, f))
 
-	return file_path
-
-
-#提取传入.docx文件有用信息，并追加到新.docx文件中。
 def transition_context(file_path, destination_document):
-	doc_text = []
-	num_paragraph = 0
+    '''
+    提取传入.docx文件有用信息，并追加到新.docx文件中
+    '''
+    doc_text = []
+    num_paragraph = 0
 
 
-	source_document = docx.Document(file_path)
+    source_document = docx.Document(file_path)
 
-	#doc_text = [paragraph.text for paragraph in source_document.paragraphs]
+    #doc_text = [paragraph.text for paragraph in source_document.paragraphs]
 
-	for paragraph in source_document.paragraphs:
-		if paragraph.text[0:9] == 'Keywords:':
-			break
-		else:
-			doc_text.append(paragraph.text)
-			num_paragraph +=1
+    for paragraph in source_document.paragraphs:
+        if paragraph.text[0:9] == 'Keywords:':
+            break
+        else:
+            doc_text.append(paragraph.text)
+            num_paragraph +=1
+    c = file_path.split("\\")
+    doc_text[0] = doc_text[0] + "..." + c[-1]
+    doc_text[num_paragraph-1] = "Abstract:" + doc_text[num_paragraph-1]
 
-
-#	destination_document.add_heading('Document Test', 0)
-	for i in range(num_paragraph):
-		if (i >= 2) and (i%2==0):
-			continue
-		if (i == 0):
-			destination_document.add_paragraph(doc_text[i], style='ListNumber')
-		else:
-			destination_document.add_paragraph(doc_text[i])
-
-	
+#   destination_document.add_heading('Document Test', 0)
+    for i in range(num_paragraph):
+        if (i >= 2) and (i%2==0):
+            continue
+        destination_document.add_paragraph(doc_text[i])
 
 
 
+def getdir(filepath=os.getcwd()):
+    """
+    用于获取目录下的文件列表
+    """
+    file_path = []
+    files = os.listdir(filepath)
+    for f in files:
+        if f.lower().endswith('docx'):
+            file_path.append(os.path.join(filepath, f))
+    return file_path
+
+def callback():
+    entry.delete(0,END) #清空entry里面的内容
+#   listbox_filename.delete(0,END)
+    #调用filedialog模块的askdirectory()函数去打开文件夹
+    
+    filepath = tkFileDialog.askdirectory() 
+    if filepath:
+        entry.insert(0,filepath) #将选择好的路径加入到entry里面
+    print (filepath)
+    destination_document = docx.Document()
+    for f_path in getdir(filepath):
+        transition_context(f_path, destination_document)
+
+    dit_file_path = filepath + "\\tango.docx"
+    print dit_file_path
+    destination_document.save(dit_file_path)
+ 
+ 
 if __name__ == "__main__":
-	i = 0
-	destination_document = docx.Document()
+    root = Tk()
+    root.title("Docx Tools")
+    root.geometry("530x200")
+    root.rowconfigure(1, weight=1)
+    root.rowconfigure(2, weight=8)
+            
+    label1 = Label(root,text="Version: 0.01")   # 创建标签  
+    label1.grid(sticky=W+N, row=1, column=1, padx=0, pady=0)
 
-	for file_path in walk_dir(os.getcwd()):
-		transition_context(file_path, destination_document)
-		i += 1
-	print i
-	destination_document.save('demo1.docx')
+    label2 = Label(root,text="Author: tangaoo@126.com (if you find some bug, report me!)")   # 创建标签  
+    label2.grid(sticky=W+N, row=2, column=1, padx=0, pady=0)
+
+    entry = Entry(root, width=60)
+    entry.grid(sticky=W+N, row=3, column=0, columnspan=4, padx=5, pady=20)
+    
+    button = Button(root,text="select folder",command=callback)
+    button.grid(sticky=W+N, row=3, column=5, padx=5, pady=20)
+
+    '''
+    #创建loistbox用来显示所有文件名
+    listbox_filename = Listbox(root, width=60)
+    listbox_filename.grid(row=2, column=0, columnspan=4, rowspan=4, 
+                            padx=5, pady=5, sticky=W+E+S+N)
+    '''
+    root.mainloop()
