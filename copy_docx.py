@@ -9,6 +9,7 @@
 from Tkinter import *
 import tkFileDialog
 import docx
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 import os
 
 
@@ -32,7 +33,7 @@ def transition_context(file_path, destination_document):
             num_paragraph +=1
     c = file_path.split("\\")
     c = c[-1].split(".")
-    doc_text[0] = doc_text[0] + "  " + c[0]
+    doc_text[0] = doc_text[0].replace('\n', ' ') + "  " + c[0]
     
 
 #   destination_document.add_heading('Document Test', 0)
@@ -47,20 +48,36 @@ def transition_context(file_path, destination_document):
         else:
             destination_document.add_paragraph(doc_text[i])
     '''
+    
+    paragraph_style = destination_document.styles['Normal']
+    font = paragraph_style.font
+    font.name = 'Times New Roman'
+    font.size = docx.shared.Pt(12)
 
+	
     for i in range(num_paragraph):
         if (i >= 2) and (i%2==0):
             continue
         if (i == 0):
-            new_paragraph = destination_document.add_paragraph(doc_text[i])
-        elif(i == 1):
-            new_paragraph.add_run("\n"  + doc_text[i])
-        elif(i == num_paragraph-1):
-            new_paragraph.add_run("\nAbstract: ").bold = True
-            new_paragraph.add_run(doc_text[i])        
-        else:
-            new_paragraph.add_run(","  + doc_text[i])
+            new_paragraph = destination_document.add_paragraph("\n")
+            new_paragraph.add_run(doc_text[i]) 
+        elif (i == 1):
+            second_paragraph = destination_document.add_paragraph(doc_text[i])
+        elif (i == num_paragraph-1):
+            abstract_paragraph = destination_document.add_paragraph("")
+            abstract_paragraph.style = destination_document.styles['Normal']
+            abstract_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            abstract_paragraph.add_run("Abstract: ").bold = True
+            abstract_paragraph.add_run(doc_text[i])   
 
+        else:
+            second_paragraph.add_run(","  + doc_text[i])
+
+
+
+    #new_paragraph.style = destination_document.styles['Normal']
+    #abstract_paragraph.style = destination_document.styles['Normal']
+    
 
 def getdir(filepath=os.getcwd()):
     """
@@ -98,10 +115,10 @@ if __name__ == "__main__":
     root.rowconfigure(1, weight=1)
     root.rowconfigure(2, weight=8)
             
-    label1 = Label(root,text="Version: 0.02")   # 创建标签  
+    label1 = Label(root,text="Version: 0.03")   # 创建标签  
     label1.grid(sticky=W+N, row=1, column=1, padx=0, pady=0)
 
-    label2 = Label(root,text="Author: tangaoo@126.com (if you find some bug, report me!)")   # 创建标签  
+    label2 = Label(root,text="Author: tangaoo@126.com (if you find some bug, report to me!)")   # 创建标签  
     label2.grid(sticky=W+N, row=2, column=1, padx=0, pady=0)
 
     entry = Entry(root, width=60)
