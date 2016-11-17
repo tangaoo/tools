@@ -25,21 +25,41 @@ def transition_context(file_path, destination_document):
     #doc_text = [paragraph.text for paragraph in source_document.paragraphs]
 
     for paragraph in source_document.paragraphs:
-        if paragraph.text[0:9] == 'Keywords:':
+        if paragraph.text[0:8] == 'Keywords' or paragraph.text[0:8] == 'keywords' or paragraph.text[0:7] == 'keyword':
             break
         else:
             doc_text.append(paragraph.text)
             num_paragraph +=1
     c = file_path.split("\\")
-    doc_text[0] = doc_text[0] + "..." + c[-1]
-    doc_text[num_paragraph-1] = "Abstract:" + doc_text[num_paragraph-1]
+    c = c[-1].split(".")
+    doc_text[0] = doc_text[0] + "  " + c[0]
+    
 
 #   destination_document.add_heading('Document Test', 0)
+    '''
     for i in range(num_paragraph):
         if (i >= 2) and (i%2==0):
             continue
-        destination_document.add_paragraph(doc_text[i])
+        if i == num_paragraph-1:
+            last_paragraph = destination_document.add_paragraph("")
+            last_paragraph.add_run("Abstract: \n").bold = True
+            last_paragraph.add_run(doc_text[i])
+        else:
+            destination_document.add_paragraph(doc_text[i])
+    '''
 
+    for i in range(num_paragraph):
+        if (i >= 2) and (i%2==0):
+            continue
+        if (i == 0):
+            new_paragraph = destination_document.add_paragraph(doc_text[i])
+        elif(i == 1):
+            new_paragraph.add_run("\n"  + doc_text[i])
+        elif(i == num_paragraph-1):
+            new_paragraph.add_run("\nAbstract: ").bold = True
+            new_paragraph.add_run(doc_text[i])        
+        else:
+            new_paragraph.add_run(","  + doc_text[i])
 
 
 def getdir(filepath=os.getcwd()):
@@ -78,7 +98,7 @@ if __name__ == "__main__":
     root.rowconfigure(1, weight=1)
     root.rowconfigure(2, weight=8)
             
-    label1 = Label(root,text="Version: 0.01")   # 创建标签  
+    label1 = Label(root,text="Version: 0.02")   # 创建标签  
     label1.grid(sticky=W+N, row=1, column=1, padx=0, pady=0)
 
     label2 = Label(root,text="Author: tangaoo@126.com (if you find some bug, report me!)")   # 创建标签  
