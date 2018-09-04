@@ -1,5 +1,7 @@
-# tools
+# tool
+python写的日常小工具。
 
+## 1 copy doc
 ### version 0.01
 拷贝标题，作者，摘要信息，追加在新.docx文档中。
 
